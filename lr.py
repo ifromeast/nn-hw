@@ -20,8 +20,8 @@ y = np.transpose([y])
 
 batch_size = 500
 lr = 1e-3
-steps = 200000
-model_path = 'model2'
+steps = 20000
+model_path = 'model3'
 
 x_net = tf.placeholder(tf.float32)
 y_net = tf.placeholder(tf.float32)
@@ -29,32 +29,32 @@ w = tf.Variable(tf.random_normal([1, 100]))
 b = tf.Variable(tf.random_normal([100]))
 w2 = tf.Variable(tf.random_normal([100, 1]))
 b2 = tf.Variable(tf.zeros([1]))
-w_summary = tf.summary.histogram('w', w)
-w2_summary = tf.summary.histogram('w2', w2)
+# w_summary = tf.summary.histogram('w', w)
+# w2_summary = tf.summary.histogram('w2', w2)
 
 h = tf.nn.sigmoid(tf.matmul(x_net, w) + b)
 predict = tf.nn.relu(tf.matmul(h, w2) + b2)
 
 h_summary = tf.summary.histogram('h', h)
-predict_summary = tf.summary.histogram('predict', predict)
+# predict_summary = tf.summary.histogram('predict', predict)
 
 loss = tf.losses.mean_squared_error(y_net, predict)
-loss_summary = tf.summary.scalar('loss', loss)
+# loss_summary = tf.summary.scalar('loss', loss)
 train_op = tf.train.AdamOptimizer(lr).minimize(loss)
 # train_op = tf.train.GradientDescentOptimizer(lr).minimize(loss)
 
-merged = tf.summary.merge_all()
-log_dir = './log/'
+# merged = tf.summary.merge_all()
+# log_dir = './log/'
 
 with tf.Session() as sess:
-    train_writer = tf.summary.FileWriter(log_dir, sess.graph)
+    # train_writer = tf.summary.FileWriter(log_dir, sess.graph)
     sess.run(tf.global_variables_initializer())
     batches = utils.batch_generator([x, y], batch_size)
 
     for step in range(steps):
-        xb, yb = batches.next()
-        _, summary = sess.run([train_op, merged], feed_dict={x_net: xb, y_net: yb})
-        train_writer.add_summary(summary, step)
+        xb, yb = batches.__next__()
+        sess.run(train_op, feed_dict={x_net: xb, y_net: yb})
+        # train_writer.add_summary(summary, step)
         if step % 100 == 0:
             ls = sess.run(loss, feed_dict={x_net: x, y_net: y})
             print(step, ": ", ls)
@@ -68,7 +68,7 @@ with tf.Session() as sess:
         pkl.dump(var_map, f_dump)
 
     y_predict = sess.run(predict, feed_dict={x_net: x})
-    train_writer.close()
+    # train_writer.close()
 
 plt.plot(x, y)
 plt.plot(x, y_predict)
